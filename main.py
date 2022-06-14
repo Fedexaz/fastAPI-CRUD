@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from mongoengine import *
 
-connect(host="mongodb+srv://FedexaZ:Fedexaz155@cluster0.acl0j9l.mongodb.net/test")
+connect(host="ASD")
 print("CONECTADO A MONGODB")
 
 class UserModel(DynamicDocument):
