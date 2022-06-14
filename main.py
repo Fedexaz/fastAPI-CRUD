@@ -1,9 +1,10 @@
+import json
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from mongoengine import *
 
-connect(host="TU-URI-DE-MONGODB-ATLAS")
+connect(host="mongodb+srv://FedexaZ:Fedexaz155@cluster0.acl0j9l.mongodb.net/test")
 print("CONECTADO A MONGODB")
 
 class UserModel(DynamicDocument):
@@ -12,7 +13,6 @@ class UserModel(DynamicDocument):
 	pais = StringField(max_length=50, required=True)
 	email = StringField(max_length=128, required=True)
 	password = StringField(max_length=128, required=True)
-	ide = IntField(min_value=1)
 
 class User(BaseModel):
     username: str
@@ -30,10 +30,9 @@ async def search_user():
 	if UserModel.objects.count() != 0:
 		return {
 			"status": 200,
-			"message": f"Hay {size} usuario/s en la DB",
-			"data": UserModel.objects()
+			"message": f"Hay {UserModel.objects.count()} usuario/s en la DB",
+			"data": json.loads(UserModel.objects().to_json())
 		}
-		#return JSONResponse(status_code=200, content=respuesta)
 	else:
 		respuesta = {
 			"status": 404,
@@ -41,65 +40,70 @@ async def search_user():
 		}
 		return JSONResponse(status_code=404, content=respuesta)
 
-
 @app.get("/users/{user_id}")
-async def search_user(user_id: int):
-	if user_id < 0 or user_id >= UserModel.objects.count():
+async def search_user(user_id: str):
+	if UserModel.objects.count() != 0:
+		try:
+			return {
+				"status": 200,
+				"data": json.loads(UserModel.objects(id=user_id).to_json())
+			}
+		except:
+			respuesta = {
+				"status": 400,
+				"message": "Ha ocurrido un error al encontrar el usuario"
+			}
+			return JSONResponse(status_code=400, content=respuesta)
+	else:
 		respuesta = {
 			"status": 404,
-			"data": "El usuario no existe"
+			"data": "No hay usuarios en la DB"
 		}
 		return JSONResponse(status_code=404, content=respuesta)
-	else:
-		return {
-			"status": 200,
-			"data": UserModel.objects(ide=user_id)
-		}
-		#return JSONResponse(status_code=200, content=respuesta)
 
 @app.post("/users")
 async def add_user(user: User):
-	usuario = UserModel(
-		username=user.username,
-		edad=user.edad,
-		pais=user.pais,
-		email=user.email,
-		password=user.password,
-		ide=UserModel.objects.count() + 1
-	)
-	usuario.save()
-	respuesta = {
-		"status": 201,
-		"message": "Usuario agregado correctamente!"
-	}
-	return JSONResponse(status_code=201, content=respuesta)
+	try:
+		usuario = UserModel(
+			username=user.username,
+			edad=user.edad,
+			pais=user.pais,
+			email=user.email,
+			password=user.password,
+		)
+		usuario.save()
+		respuesta = {
+			"status": 201,
+			"message": "Usuario agregado correctamente!"
+		}
+		return JSONResponse(status_code=201, content=respuesta)
+	except:
+		respuesta = {
+			"status": 400,
+			"message": "Ha ocurrido un error al crear el usuario"
+		}
+		return JSONResponse(status_code=400, content=respuesta)
 
 @app.delete("/users/{user_id}")
-async def delete_user(user_id: int):
-	if user_id <= 0 or user_id > UserModel.objects.count():
-		respuesta = {
-			"status": 404,
-			"data": "El usuario a eliminar no existe"
-		}
-		return JSONResponse(status_code=404, content=respuesta)
-	else:
-		UserModel.objects(ide=user_id).delete()
+async def delete_user(user_id: str):
+	try:
+		UserModel.objects(id=user_id).delete()
 		respuesta = {
 			"status": 200,
 			"message": "Usuario removido correctamente!"
 		}
 		return JSONResponse(status_code=200, content=respuesta)
+	except:
+		respuesta = {
+			"status": 400,
+			"message": "Ha ocurrido un error al eliminar el usuario"
+		}
+		return JSONResponse(status_code=400, content=respuesta)
 
 @app.put("/users/{user_id}")
-async def edit_user(user_id: int, user: User):
-	if user_id < 0 or user_id > UserModel.objects.count():
-		respuesta = {
-			"status": 404,
-			"data": "El usuario a editar no existe"
-		}
-		return JSONResponse(status_code=404, content=respuesta)
-	else:
-		usuario = UserModel.objects(ide=user_id).update(
+async def edit_user(user_id: str, user: User):
+	try:
+		usuario = UserModel.objects(id=user_id).update(
 			username = user.username,
 			edad = user.edad,
 			pais = user.pais,
@@ -111,3 +115,9 @@ async def edit_user(user_id: int, user: User):
 			"message": "Usuario editado correctamente!"
 		}
 		return JSONResponse(status_code=200, content=respuesta)
+	except:
+		respuesta = {
+			"status": 400,
+			"message": "Ha ocurrido un error al editar el usuario"
+		}
+		return JSONResponse(status_code=400, content=respuesta)
