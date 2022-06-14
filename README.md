@@ -21,7 +21,7 @@ uvicorn main:app --reload
 Tipo|Ruta|Descripción|Formato
 ---|---|---|---
 GET|/users|Devuelve la lista completa de usuarios creados|-
-GET|/users/{id}|Devuelve un usuario en específico|id=Integer
+GET|/users/{id}|Devuelve un usuario en específico|ID=id del objeto (mongo ID)
 POST|/users|Inserta un usuario en la base de datos|Body=```{username: String, edad: Integer, pais: String, email: String, password: String}```
-PUT|/users/{id}|Modifica un usuario de la base de datos|id=Integer, Body=```{username: String, edad: Integer, pais: String, email: String, password: String}```
-DELETE|/users/{id}|Elimina un usuario específico|id=Integer
+PUT|/users/{id}|Modifica un usuario de la base de datos|ID=id del objeto (mongo ID), Body=```{username: String, edad: Integer, pais: String, email: String, password: String}```
+DELETE|/users/{id}|Elimina un usuario específico|ID=id del objeto (mongo ID)
