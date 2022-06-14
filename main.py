@@ -1,9 +1,9 @@
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from mongoengine import *
 
-connect(host="mongodb+srv://FedexaZ:Fedexaz155@cluster0.acl0j9l.mongodb.net/test")
+connect(host="TU-URI-DE-MONGODB-ATLAS")
 print("CONECTADO A MONGODB")
 
 class UserModel(DynamicDocument):
